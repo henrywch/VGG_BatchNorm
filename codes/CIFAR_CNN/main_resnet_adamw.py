@@ -158,6 +158,7 @@ def main():
     train_losses, val_losses = [], []
     train_accuracies, val_accuracies = [], []
     lrs = []
+    best_accuracy = 0.0  # Track the best validation accuracy
 
     def train(epoch):
         model.train()
@@ -190,22 +191,21 @@ def main():
     def test(epoch):
         model.eval()
         correct, total = 0, 0
-        all_preds, all_targets = [], []
+        total_loss = 0.0
         with torch.no_grad():
             for inputs, targets in testloader:
                 inputs, targets = inputs.to(device), targets.to(device)
                 outputs = model(inputs)
+                loss = criterion(outputs, targets)
+                total_loss += loss.item() * inputs.size(0)  # Accumulate loss
                 _, predicted = torch.max(outputs.data, 1)
                 total += targets.size(0)
                 correct += (predicted == targets).sum().item()
-                all_preds.extend(predicted.cpu().numpy())
-                all_targets.extend(targets.cpu().numpy())
 
-        val_loss = criterion(model(inputs), targets).item()
-        val_losses.append(val_loss)
+        avg_loss = total_loss / total  # Correctly averaged over all samples
+        val_losses.append(avg_loss)
         val_accuracies.append(100 * correct / total)
-        print(f"Epoch {epoch} | Test Accuracy: {100 * correct / total:.2f}% | Loss: {val_loss:.4f}")
-        return all_preds, all_targets
+        print(f"Epoch {epoch} | Test Accuracy: {100 * correct / total:.2f}% | Loss: {avg_loss:.4f}")
 
     # ----------------------------
     # 6. Training and Evaluation
@@ -213,7 +213,12 @@ def main():
     for epoch in range(1, epochs + 1):
         train(epoch)
         if epoch % 5 == 0:  # Reduce logging frequency
-            preds, targets = test(epoch)
+            test(epoch)
+            current_acc = val_accuracies[-1]  # Get latest validation accuracy
+            if current_acc > best_accuracy:
+                best_accuracy = current_acc
+                torch.save(model.state_dict(), 'best_model.pth')
+                print(f"Saved best model with accuracy {current_acc:.2f}%")
 
     # ----------------------------
     # 7. Visualization
@@ -243,7 +248,10 @@ def main():
     plt.show()
 
     # Confusion Matrix
+    model.load_state_dict(torch.load('best_model.pth'))  # Load best weights
     model.eval()
+
+    # Generate confusion matrix with the best model
     all_preds, all_targets = [], []
     with torch.no_grad():
         for inputs, targets in testloader:
