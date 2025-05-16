@@ -495,8 +495,7 @@ We trained two variants of VGG-A (with and without BN) using the same hyperparam
 #### Loss Landscape Visualization  
 The loss landscape was analyzed by training models with different learning rates and plotting the min/max loss bounds:  
 
-![1e-4](codes/reports/figures/loss_landscape_1e-4.png "loss comparison on lr 1e-4")
-![5e-4](codes/reports/figures/loss_landscape_5e-4.png "loss comparison on lr 5e-4")
+![Combined](codes/reports/figures/combined_loss_landscape.png "loss comparison on lr 1e-4")
 
 **Observations**:  
 - BN reduces the Lipschitz constant of the loss landscape, enabling smoother optimization.  

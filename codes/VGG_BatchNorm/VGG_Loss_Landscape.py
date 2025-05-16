@@ -185,10 +185,7 @@ if __name__ == "__main__":
 
     # Train models with different configurations
     all_losses = {'with_bn': {}, 'without_bn': {}}
-    # learning_rates = [1e-3, 2e-3, 5e-4]
-    # learning_rates = [1e-4]
-    # learning_rates = [5e-4]
-    learning_rates = [1e-3]
+    learning_rates = [1e-4, 5e-4, 1e-3, 2e-3]
 
     for lr in learning_rates:
         # Train with BN
